@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cctype>
 #include <iostream>
+#include <map>
 #include <stdexcept>
 #include <vector>
 
@@ -23,6 +24,31 @@ int totalDistanceTwoVectors(const std::vector<int>& leftColumn,
   return totalDistance;
 }
 
+int similarityScore(const std::vector<int>& left,
+                    const std::vector<int>& right) {
+  int res = 0;
+
+  if (left.size() != right.size()) {
+    throw std::invalid_argument("Vectors are not the same length");
+  }
+
+  std::map<int, int> similarities{};
+  for (auto element : left) {
+    int similarityScore = 0;
+    if (similarities.find(element) == similarities.end()) {
+      int countSim = std::count_if(right.begin(), right.end(),
+                                   [&element](int i) { return element == i; });
+      similarityScore = element * countSim;
+      similarities.insert(std::pair{element, similarityScore});
+    } else {
+      similarityScore = similarities.at(element);
+    }
+    res += similarityScore;
+  }
+
+  return res;
+}
+
 int main(int /* argc */, char** /* argv */) {
   changeDelimiterOfFile("day1-input.txt", "day1-input.txt.output", "   ", ",");
   auto data = parseDelimiterSeparatedFile("day1-input.txt.output", ',');
@@ -32,8 +58,10 @@ int main(int /* argc */, char** /* argv */) {
   std::sort(rightColumn.begin(), rightColumn.end());
 
   auto sum = totalDistanceTwoVectors(leftColumn, rightColumn);
-
   std::cout << "Sum of distance: " << sum << std::endl;
+
+  auto score = similarityScore(leftColumn, rightColumn);
+  std::cout << "Sum of similarities: " << score << std::endl;
 
   return 0;
 }
