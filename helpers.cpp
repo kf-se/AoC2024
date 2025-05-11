@@ -27,6 +27,9 @@ void changeDelimiterOfFile(const fs::path& fp, const fs::path& fp_out,
     throw std::logic_error("Failed to open file");
   }
 
+  std::cout << "Changing delimiter of file " << fp << " from: '" << delimFrom
+            << "' to: '" << delimTo << "' in file " << fp_out << std::endl;
+
   std::ofstream ostrm(fp_out);
   std::string line;
   getline(istrm, line);

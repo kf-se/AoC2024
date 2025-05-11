@@ -3,21 +3,20 @@
 
 #include "helpers.h"
 
-enum class State { idle, command };
-enum class Command { unknown, chdf, quit, filepath };
+enum class State { idle, chdf, quit };
 
-void printVector(std::vector<std::string>& vec) {
+void printVector(const std::vector<std::string>& vec) {
   std::for_each(vec.begin(), vec.end(),
-                [](std::string& s) { std::cout << s << " "; });
+                [](const std::string& s) { std::cout << "'" << s << "',"; });
   std::cout << std::endl;
 }
 
-void print(std::string s) {
+void print(const std::string s) {
   std::cout << s << std::endl;
 }
 
-Command parseCommand(const std::unordered_map<std::string, Command>& cmdsMap,
-                     const std::vector<std::string>& args) {
+State parseCommand(const std::unordered_map<std::string, State>& cmdsMap,
+                   const std::vector<std::string>& args, State state) {
   for (auto argc : args) {
     auto it = cmdsMap.find(argc);
     if (it != cmdsMap.end()) {
@@ -25,72 +24,71 @@ Command parseCommand(const std::unordered_map<std::string, Command>& cmdsMap,
     }
   }
 
-  return Command::unknown;
+  return state;
 }
 
-void executeCmdHelp(const Command& cmd) {
-  if (cmd == Command::chdf) {
+void executeCmdHelp(const State& state) {
+  if (state == State::chdf) {
     print("Change delimiter of file\n");
-    print("f filename delimiter_in delimiter_out\n");
-  } else if (cmd == Command::quit) {
-    print("Quitting...\n");
+    print("filename delimiter_in delimiter_out\n");
   }
 }
 
-static const std::unordered_map<std::string, Command> idleCmdsMap = {
-    {"chdf", Command::chdf}, {"quit", Command::quit}, {"exit", Command::quit}};
-
-static const std::unordered_map<std::string, Command> chdfCmdsMap = {
-    {"f", Command::filepath}};
+static const std::unordered_map<std::string, State> cmdsMap = {
+    {"chdf", State::chdf}, {"quit", State::quit}, {"exit", State::quit}};
 
 static void executeChdf(const std::vector<std::string>& args) {
-  auto cmd = parseCommand(chdfCmdsMap, args);
-  if (cmd == Command::unknown) {
-    print("Unknown command!\n");
+  if (args.size() < 3) {
+    print("Not enough arguments.");
     return;
   }
-  auto fp = args.at(1);
+
+  auto fp = args.at(0);
   auto fp_out = fp + ".out";
-  changeDelimiterOfFile(fp, fp_out, args.at(2), args.at(3));
+  changeDelimiterOfFile(fp, fp_out, args.at(1), args.at(2));
 }
 
-// utilities in a command line interface for parsing/manipulating raw AoC input
-// data
+std::vector<std::string> tokenize(const std::string& line) {
+  std::istringstream iss(line);
+  std::vector<std::string> tokens;
+  std::string token;
+
+  while (iss >> std::quoted(token)) {
+    tokens.push_back(token);
+  }
+
+  return tokens;
+}
+
 int main(int argc, char** /* argv */) {
+  print("Utilities for parsing/manipulating raw AoC input data\n");
+  print("Type 'exit/quit' to quit.\n");
+
   std::string line;
   State state = State::idle;
-  Command current_cmd = Command::unknown;
-  bool running = true;
 
-  print("Manage aoc input. Type 'exit/quit' to quit.\n");
-
-  while (running) {
+  while (state != State::quit) {
     std::cout << "> ";
     std::getline(std::cin, line);
 
-    auto args = tokenizer(line, ',');
+    auto args = tokenize(line);
 
     if (args.empty()) continue;
     printVector(args);
+    auto next_state = parseCommand(cmdsMap, args, state);
 
     switch (state) {
       case State::idle:
-        current_cmd = parseCommand(idleCmdsMap, args);
-        if (current_cmd == Command::unknown) {
-          print("Please enter a valid command");
-          break;
-        } else if (current_cmd == Command::quit)
-          running = false;
-        executeCmdHelp(current_cmd);
-        state = State::command;
-      case State::command:
+        executeCmdHelp(next_state);
+        break;
+      case State::chdf:
+        executeChdf(args);
         break;
       default:
         break;
     }
-
-    if (std::find(args.begin(), args.end(), "chd") != args.end()) {
-      print("Enter filename: ");
+    if (next_state != state) {
+      state = next_state;
     }
   }
 
