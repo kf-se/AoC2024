@@ -50,8 +50,7 @@ int similarityScore(const std::vector<int>& left,
 }
 
 int main(int /* argc */, char** /* argv */) {
-  changeDelimiterOfFile("day1-input.txt", "day1-input.txt.output", "   ", ",");
-  auto data = parseDelimiterSeparatedFile("day1-input.txt.output", ',');
+  auto data = parseDelimiterSeparatedFile("day1-input.txt.out", ',');
   std::vector<int> leftColumn = data.first;
   std::vector<int> rightColumn = data.second;
   std::sort(leftColumn.begin(), leftColumn.end());
