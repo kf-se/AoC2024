@@ -1,9 +1,16 @@
+#include "helpers.h"
+
 #include <fstream>
 #include <iostream>
 
-#include "helpers.h"
-
 namespace fs = std::filesystem;
+
+void printVector(const std::vector<int>& vec) {
+  for (auto e : vec) {
+    std::cout << e << " ";
+  }
+  std::cout << std::endl;
+}
 
 bool has_only_space(const std::string& str) {
   return str.find_first_not_of(' ') == str.npos;
@@ -78,4 +85,26 @@ std::pair<std::vector<int>, std::vector<int>> parseDelimiterSeparatedFile(
   }
 
   return ret;
+}
+
+std::vector<std::vector<int>> parseDelimiterSeparatedFileV2(fs::path fp,
+                                                            char delimiter) {
+  std::ifstream istr(fp);
+  if (!istr.is_open()) {
+    std::cout << "failed to open " << fp.c_str() << std::endl;
+    throw std::logic_error("Failed to open file");
+  }
+
+  std::string line;
+  std::vector<std::vector<int>> lines;
+  while (getline(istr, line)) {
+    auto tokens = tokenizer(line, delimiter);
+    std::vector<int> vec;
+    for (auto e : tokens) {
+      vec.push_back(std::stoi(e));
+    }
+    lines.push_back(vec);
+  }
+
+  return lines;
 }

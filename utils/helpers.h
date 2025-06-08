@@ -18,4 +18,7 @@ std::vector<std::string> tokenizer(const std::string& str, char delimiter);
 std::pair<std::vector<int>, std::vector<int>> parseDelimiterSeparatedFile(
     fs::path fp, char delimiter);
 
+std::vector<std::vector<int>> parseDelimiterSeparatedFileV2(fs::path fp,
+                                                            char delimiter);
+
 void printVector(const std::vector<int>& vec);

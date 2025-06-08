@@ -11,6 +11,7 @@ flags = [
         '-x',
         'c++',
         '-std=c++17',
+        '-I', 'utils',          # include dir utils...
         ]
 
 
