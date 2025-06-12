@@ -42,55 +42,70 @@ bool isComma(const char c) {
 
 std::vector<std::function<int()>> parseInput(const std::string& input) {
   static const std::string MUL = "mul(";
+  static const std::string DONT = "don't()";
+  static const std::string DO = "do()";
 
   std::vector<std::function<int()>> res = {};
   std::stringstream ss;
 
-  size_t end = input.find(MUL);
+  size_t end = 0;
+  size_t indexDo = 0;
+  size_t indexDont = 0;
   while (end != std::string::npos) {
-    end += MUL.size();
-    auto start = end;
-    while (start != std::string::npos && isDigit(input.at(start)) &&
-           start - end < 3) {
-      ++start;
-    }
-    auto subs = input.substr(end, start - end);
-    LOG << end << " " << start << " "
-        << "Substring: " << subs << std::endl;
-    int x = 0;
-    try {
-      x = std::stoi(subs);
-      LOG << x << std::endl;
-    } catch (std::invalid_argument& e) {
-      LOG << e.what() << input.substr(end, start) << std::endl;
+    indexDo = end == 0 ? 0 : input.find(DO, end);
+    indexDont = input.find(DONT, end);
+    if (indexDo > indexDont) {
+      indexDont = input.find(DONT, indexDo);
     }
 
-    int y = 0;
-    if (start != std::string::npos && isComma(input.at(start))) {
-      auto end2 = start + 1;
-      auto nextStart = end2;
-      while (nextStart != std::string::npos && isDigit(input.at(nextStart)) &&
-             nextStart - end2 < 3) {
-        ++nextStart;
+    end = input.find(MUL, indexDo);
+    LOG << input.at(indexDo) << std::endl;
+
+    while (end != std::string::npos && end < indexDont) {
+      end += MUL.size();
+      auto start = end;
+      while (start != std::string::npos && isDigit(input.at(start)) &&
+             start - end < 3) {
+        ++start;
       }
-      auto subss = input.substr(end2, nextStart - end2);
-      LOG << end2 << " " << nextStart << " "
-          << "Substrings: " << subss << std::endl;
+      auto subs = input.substr(end, start - end);
+      LOG << end << " " << start << " "
+          << "Substring: " << subs << std::endl;
+      int x = 0;
       try {
-        y = std::stoi(subss);
-        LOG << y << std::endl;
+        x = std::stoi(subs);
+        LOG << x << std::endl;
       } catch (std::invalid_argument& e) {
-        LOG << e.what() << subss << std::endl;
+        LOG << e.what() << input.substr(end, start) << std::endl;
       }
 
-      if (nextStart != std::string::npos &&
-          isEndingParenthesis(input.at(nextStart))) {
-        LOG << "Push back" << std::endl;
-        res.push_back(std::bind(mul, x, y));
+      int y = 0;
+      if (start != std::string::npos && isComma(input.at(start))) {
+        auto end2 = start + 1;
+        auto nextStart = end2;
+        while (nextStart != std::string::npos && isDigit(input.at(nextStart)) &&
+               nextStart - end2 < 3) {
+          ++nextStart;
+        }
+        auto subss = input.substr(end2, nextStart - end2);
+        LOG << end2 << " " << nextStart << " "
+            << "Substrings: " << subss << std::endl;
+        try {
+          y = std::stoi(subss);
+          LOG << y << std::endl;
+        } catch (std::invalid_argument& e) {
+          LOG << e.what() << subss << std::endl;
+        }
+
+        if (nextStart != std::string::npos &&
+            isEndingParenthesis(input.at(nextStart))) {
+          LOG << "Push back" << std::endl;
+          res.push_back(std::bind(mul, x, y));
+        }
       }
+
+      end = input.find(MUL, end);
     }
-
-    end = input.find(MUL, end);
   }
 
   return res;
@@ -101,7 +116,11 @@ int main() {
       "xmul(2,4)%&mul[3,7]!mul(02341.)@^do_not_mul(5,5)+mul(32,64]then(mul(11,"
       "8)"
       "mul(8,5))";
-
+  std::string testData2 =
+      "xmul(2,4)do()mul(1,1)&mul[3,7]!^don't()_mul(5,5)don't()mul(5,5)do()+mul("
+      "32,64](mul(11,8)"
+      "undo()?mul(8,5)"
+      ")";
   auto fp = std::filesystem::path("day3-input.txt.out");
   std::ifstream istrm(fp);
   if (!istrm.is_open()) {
@@ -116,7 +135,7 @@ int main() {
 
   auto operations = parseInput(data);
   auto res = summarise(operations);
-  std::cout << data;
+  std::cout << testData2;
   std::cout << LOG.str();
   std::cout << "Results: " << res << std::endl;
 }
