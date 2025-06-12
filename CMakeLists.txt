@@ -46,4 +46,5 @@ endfunction()
 # Add executables for each day
 add_day_exec(day1)
 add_day_exec(day2)
+add_day_exec(day3)
 
