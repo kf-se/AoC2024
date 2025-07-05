@@ -37,68 +37,57 @@ int findXmas(const vector<string> &data) {
 
     while (cx < rowSize) {
       if (row.at(cx) == 'X') {
-        // Find horizontal
-        {
-          bool leftMatch = true;
-          bool rightMatch = true;
-          for (const auto &[k, v] : xmas) {
-            if (cx - k < 0 || row.at(cx - k) != v)
-              leftMatch = false;
-            if (cx + k >= rowSize || row.at(cx + k) != v)
-              rightMatch = false;
-          }
-          if (leftMatch)
-            ++nrXmas;
-          if (rightMatch)
-            ++nrXmas;
-        }
-        // Find vertical
-        {
-          bool upMatch = true;
-          bool downMatch = true;
-          for (const auto &[k, v] : xmas) {
-            if (rx - k < 0 || data.at(rx - k).at(cx) != v)
-              upMatch = false;
-            if (rx + k >= dataSize || cx >= data.at(rx + k).size() ||
-                data.at(rx + k).at(cx) != v)
-              downMatch = false;
-          }
-          if (upMatch)
-            ++nrXmas;
-          if (downMatch)
-            ++nrXmas;
-        }
-        // Find diagonal
-        {
-          bool upLeftMatch = true;
-          bool upRightMatch = true;
-          bool downLeftMatch = true;
-          bool downRightMatch = true;
+        bool leftMatch = true;
+        bool rightMatch = true;
+        bool upMatch = true;
+        bool downMatch = true;
+        bool upLeftMatch = true;
+        bool upRightMatch = true;
+        bool downLeftMatch = true;
+        bool downRightMatch = true;
+        for (const auto &[k, v] : xmas) {
+          // Find horizontal
+          if (cx - k < 0 || row.at(cx - k) != v)
+            leftMatch = false;
+          if (cx + k >= rowSize || row.at(cx + k) != v)
+            rightMatch = false;
 
-          for (const auto &[k, v] : xmas) {
-            if (rx - k < 0 || cx - k < 0 || data.at(rx - k).at(cx - k) != v)
-              upLeftMatch = false;
-            if (rx - k < 0 || cx + k >= data.at(rx - k).size() ||
-                data.at(rx - k).at(cx + k) != v)
-              upRightMatch = false;
-            if (rx + k >= dataSize || cx + k >= data.at(rx + k).size() ||
-                data.at(rx + k).at(cx + k) != v)
-              downRightMatch = false;
-            if (rx + k >= dataSize || cx - k < 0 ||
-                cx + k > data.at(rx + k).size() ||
-                data.at(rx + k).at(cx - k) != v)
-              downLeftMatch = false;
-          }
+          // Find vertical
+          if (rx - k < 0 || data.at(rx - k).at(cx) != v)
+            upMatch = false;
+          if (rx + k >= dataSize || cx >= data.at(rx + k).size() ||
+              data.at(rx + k).at(cx) != v)
+            downMatch = false;
 
-          if (upLeftMatch)
-            ++nrXmas;
-          if (downLeftMatch)
-            ++nrXmas;
-          if (upRightMatch)
-            ++nrXmas;
-          if (downRightMatch)
-            ++nrXmas;
+          // Find diagonal
+          if (rx - k < 0 || cx - k < 0 || data.at(rx - k).at(cx - k) != v)
+            upLeftMatch = false;
+          if (rx - k < 0 || cx + k >= data.at(rx - k).size() ||
+              data.at(rx - k).at(cx + k) != v)
+            upRightMatch = false;
+          if (rx + k >= dataSize || cx + k >= data.at(rx + k).size() ||
+              data.at(rx + k).at(cx + k) != v)
+            downRightMatch = false;
+          if (rx + k >= dataSize || cx - k < 0 || data.at(rx + k).size() == 0 ||
+              data.at(rx + k).at(cx - k) != v)
+            downLeftMatch = false;
         }
+        if (leftMatch)
+          ++nrXmas;
+        if (rightMatch)
+          ++nrXmas;
+        if (upMatch)
+          ++nrXmas;
+        if (downMatch)
+          ++nrXmas;
+        if (upLeftMatch)
+          ++nrXmas;
+        if (downLeftMatch)
+          ++nrXmas;
+        if (upRightMatch)
+          ++nrXmas;
+        if (downRightMatch)
+          ++nrXmas;
       }
       ++cx;
     }
@@ -113,8 +102,9 @@ int main() {
   LOG << data.size();
   cout << LOG.str() << endl;
   cout << data[0].size() << endl;
-  data = {"MMMSXXMASM", "MSAMXMSMSA", "AMXSXMAAMM", "MSAMASMSMX", "XMASAMXAMM",
-          "XXAMMXXAMA", "SMSMSASXSS", "SAXAMASAAA", "MAMMMXMMMM", "MXMXAXMASX"};
+  vector<string> data2 = {
+      "MMMSXXMASM", "MSAMXMSMSA", "AMXSXMAAMM", "MSAMASMSMX", "XMASAMXAMM",
+      "XXAMMXXAMA", "SMSMSASXSS", "SAXAMASAAA", "MAMMMXMMMM", "MXMXAXMASX"};
   int ret = findXmas(data);
   cout << "answer: " << ret << endl;
 }
